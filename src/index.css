@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Benton Sans Cond";
+  src: url("/fonts/BentonSansCond-Bold.woff2") format("woff2"),
+    url("/fonts/BentonSansCond-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Benton Sans Cond";
+  src: url("/fonts/BentonSansCond-Regular.woff2") format("woff2"),
+    url("/fonts/BentonSansCond-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Miller Headline";
+  src: url("/fonts/miller-headline-bold.woff2") format("woff2"),
+    url("/fonts/miller-headline-bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-display: "Benton Sans Cond";
+
+  --color-primary-600: rgb(185, 79, 9);
+  --color-primary-100: rgb(255, 243, 235);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --blue-button: #005dc7;
+  --orange: rgb(185, 79, 9);
+  --orange-100: rgb(255, 243, 235);
+}
+
+button[disabled] {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Base style for .tile
+ * This applies to all screen sizes by default, acting as the starting point.
+ * It also serves as the fallback for very small screens (<= 200px)
+ * or browsers that don't support clamp() AND don't hit any of the media queries.
+ */
+.tile {
+  font-size: 0.625rem;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* --- FALLBACK STRATEGY (for browsers that DO NOT support clamp()) ---
+ * These media queries provide discrete steps to mimic the clamp() behavior
+ * for browsers that don't support it (or as a robust fallback).
+ * They must be defined *after* the base .tile style.
+ */
+
+@media (min-width: 201px) {
+  .tile {
+    font-size: 0.88rem;
+  }
+}
+
+@media (min-width: 281px) {
+  .tile {
+    font-size: 1.15rem;
+  }
+}
+
+@media (min-width: 321px) {
+  .tile {
+    font-size: 1.42rem;
+  }
+}
+
+@media (min-width: 361px) {
+  .tile {
+    font-size: 1.68rem;
+  }
+}
+
+@media (min-width: 401px) {
+  .tile {
+    font-size: 1.94rem;
+  }
+}
+
+@media (min-width: 441px) {
+  .tile {
+    font-size: 2.21rem;
+  }
+}
+
+@media (min-width: 481px) {
+  .tile {
+    font-size: 2.47rem;
+  }
+}
+
+@media (min-width: 521px) {
+  .tile {
+    font-size: 2.74rem;
+  }
+}
+
+@media (min-width: 600px) {
+  .tile {
+    font-size: 3rem;
+  }
+}
+
+/* --- CLAMP IMPLEMENTATION (for browsers that DO support clamp()) ---
+ * This will override all the fallbacks above if the browser supports clamp().
+ * The @supports rule is typically placed last to ensure it overrides the fallbacks.
+ */
+@supports (font-size: clamp(0.625rem, -0.5625rem + 9.5vw, 3rem)) {
+  .tile {
+    font-size: clamp(0.625rem, -0.5625rem + 9.5vw, 3rem);
+  }
+}
+
+.text-trim-start {
+  margin-top: 0.15em;
+
+  @supports (text-box-trim: trim-start) {
+    text-box-trim: trim-start;
+    margin-top: 0;
+  }
+}
+
+.text-trim-both {
+  margin-top: 0.15em;
+
+  @supports (text-box-trim: trim-both) {
+    text-box-trim: trim-both;
+    margin-top: 0;
+  }
+}
