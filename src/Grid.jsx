@@ -110,7 +110,6 @@ export default function Grid({
             yoyo: true,
             repeat: 1,
             duration: QUARTER_DURATION,
-            delay: r === 0 ? QUARTER_DURATION : 0,
           });
         }
 
@@ -131,7 +130,6 @@ export default function Grid({
             yoyo: true,
             repeat: 1,
             duration: QUARTER_DURATION,
-            delay: c === 0 ? QUARTER_DURATION : 0,
           });
         }
       }
@@ -327,7 +325,6 @@ export default function Grid({
             newCells[draggedTileIndex] = hitTileTemp;
             newCells[hitTileIndex] = draggedTileTemp;
 
-            console.log("Setting new cells on drag end...");
             setCells(newCells);
             // sync cellsRef with cells in order to trigger Flip animation
             cellsRef.current = newCells;
@@ -472,7 +469,6 @@ export default function Grid({
             return cell; // Return the original object for unchanged cells
           });
 
-          console.log("Setting new cells on flip start...");
           // Update the cells state with the new undraggable cells
           setCells(updatedCells);
         }
@@ -552,7 +548,7 @@ export default function Grid({
   return (
     <div
       ref={gridContainerRef}
-      className="touch-none perspective-midrange relative grid grid-cols-5 p-2 w-full aspect-square mx-auto bg-primary-100 rounded-md border-2 border-orange-800"
+      className="touch-none perspective-midrange relative grid grid-cols-5 p-2 gap-1 w-full aspect-square mx-auto bg-primary-100 rounded-md border-2 border-orange-800"
     >
       {cells.map((cell, index) => (
         <div

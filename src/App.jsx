@@ -10,7 +10,12 @@ import GlobeLogo from "./assets/globe.svg";
 import AlignLogo from "./assets/align-logo.png";
 import Modal from "./Modal";
 
-import { TimerIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import {
+  TimerIcon,
+  ArrowsClockwiseIcon,
+  CrownSimpleIcon,
+  PuzzlePieceIcon,
+} from "@phosphor-icons/react";
 import clsx from "clsx";
 
 gsap.registerPlugin(useGSAP, Draggable, Flip, SplitText);
@@ -26,11 +31,17 @@ const formatTime = (options) => {
   const minutesExist = minutes > 0;
 
   if (legible) {
-    return `
-      ${minutes > 0 ? `${minutes}m` : ""}${
-      minutesExist ? ` ${formatNumber(seconds)}` : formatNumber(seconds)
-    }${legible ? `.${formatNumber(hundredths)}s` : ""}
-    `;
+    return (
+      <>
+        <span>{minutes > 0 ? `${minutes}` : ""}</span>
+        {minutesExist && <span className="text-2xl">m</span>}
+        <span>
+          {minutesExist ? ` ${seconds}` : `${seconds}`}:
+          {formatNumber(hundredths)}
+        </span>
+        <span className="text-2xl">s</span>
+      </>
+    );
   }
 
   if (scored) {
@@ -48,6 +59,7 @@ const FINAL_PUZZLE_INDEX = puzzles.length - 1;
 
 function App() {
   const congratsRef = useRef(null);
+  const congratsIconRef = useRef(null);
   const passwordRef = useRef("");
   const nameRef = useRef("");
   const intervalRef = useRef(null);
@@ -64,14 +76,14 @@ function App() {
     password: "",
     moves: 0,
   });
+  const [finalPuzzleCompleted, setFinalPuzzleCompleted] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [changePuzzle, setChangePuzzle] = useState(false);
   const [submitting, setSubmitting] = useState({
     text: "Submit",
     loading: false,
     type: "score",
   });
-
-  const finalPuzzleCompleted = puzzleData.index === FINAL_PUZZLE_INDEX;
 
   const startTimer = () => {
     intervalRef.current = setInterval(() => {
@@ -130,9 +142,9 @@ function App() {
     const puzzleToLoadIndex = puzzles.indexOf(puzzleToLoad);
 
     // prevent loading the same puzzle or going back to a prior puzzle
-    if (!checkName && puzzleToLoadIndex !== +puzzleData.index + 1) {
+    if (!checkName && puzzleToLoadIndex <= puzzleData.index) {
       setFormMsg({
-        text: "That's not the next puzzle!",
+        text: "There's no going back...",
         type: "password",
       });
       return;
@@ -171,8 +183,9 @@ function App() {
     });
     resetTimer();
     startTimer();
+    setChangePuzzle(false);
     setGameCompleted(false);
-    passwordRef.current.value = ""; // Clear the input field
+    passwordRef.current.value = "";
   }
 
   function resetFormMsg() {
@@ -221,9 +234,16 @@ function App() {
       );
 
       const result = await response.json();
-      console.log("🚀 ~ handleSubmitScore ~ result:", result);
 
-      if (response.ok) {
+      if (result.status === "error") {
+        setSubmitting({
+          ...submitting,
+          text: "Something went wrong! Please try again.",
+          loading: false,
+        });
+
+        resetSubmitStatus();
+      } else {
         setSubmitting({
           ...submitting,
           text: "Success!",
@@ -236,15 +256,11 @@ function App() {
             text: "Enter",
             loading: false,
           });
-        }, 1000);
-      } else {
-        setSubmitting({
-          ...submitting,
-          text: "Something went wrong!",
-          loading: false,
-        });
 
-        resetSubmitStatus();
+          if (puzzleData.index === FINAL_PUZZLE_INDEX) {
+            setFinalPuzzleCompleted(true);
+          }
+        }, 1000);
       }
     } catch (error) {
       setSubmitting({
@@ -257,112 +273,66 @@ function App() {
     }
   }
 
-  // Stress test Sheets API
-  // useEffect(() => {
-  //   async function sendConcurrentRequests() {
-  //     // The URL for the POST request
-  //     const url =
-  //       "https://script.google.com/macros/s/AKfycbyuZCyhyANUquk3oWokGCYJYrrjGeOqjIA2FXIKytp5emLaFPhLGhUYd8o3SS8krT7m/exec";
-
-  //     // The headers for the request
-  //     const headers = {
-  //       "Content-Type": "text/plain",
-  //     };
-
-  //     // An array to store all the promises from the fetch calls
-  //     const promises = [];
-
-  //     // Use a loop to create 100 fetch requests
-  //     for (let i = 0; i < 10; i++) {
-  //       // Create some unique data for each request
-  //       const data = {
-  //         puzzle: i,
-  //         name: `test`,
-  //         time: `${i}:00:00`,
-  //         moves: `${i}`,
-  //         sheet: `Sheet1`,
-  //       };
-  //       // Generate a random delay between 250 and 1000 milliseconds
-  //       const delay = Math.floor(Math.random() * (1000 - 250 + 1)) + 250;
-
-  //       // Create a new promise for each request
-  //       const requestPromise = new Promise((resolve, reject) => {
-  //         // Use setTimeout to schedule the fetch call after the random delay
-  //         setTimeout(async () => {
-  //           try {
-  //             console.log(
-  //               `Sending request #${i + 1} after a delay of ${delay}ms...`
-  //             );
-
-  //             // The fetch call is now inside the timeout, but the loop has already finished.
-  //             // This allows all requests to be scheduled concurrently.
-  //             const response = await fetch(url, {
-  //               method: "POST",
-  //               headers: headers,
-  //               body: JSON.stringify(data),
-  //             });
-
-  //             if (!response.ok) {
-  //               throw new Error(
-  //                 `HTTP error! Status: ${response.status} for request #${i + 1}`
-  //               );
-  //             }
-
-  //             const result = await response.text();
-  //             resolve(result); // Resolve the promise with the response body
-  //           } catch (error) {
-  //             console.error(`Request #${i + 1} failed:`, error);
-  //             reject(error); // Reject the promise on failure
-  //           }
-  //         }, delay);
-  //       });
-
-  //       promises.push(requestPromise);
-  //     }
-
-  //     // Use Promise.all to wait for all promises to settle
-  //     try {
-  //       console.log(
-  //         "All 100 requests have been scheduled. Waiting for them to complete..."
-  //       );
-  //       const results = await Promise.all(promises);
-
-  //       console.log("All 100 scheduled requests completed successfully!");
-
-  //       results.forEach((result, index) => {
-  //         console.log(`Response from request #${index + 1}:`, result);
-  //       });
-  //     } catch (error) {
-  //       console.error("One or more scheduled requests failed:", error);
-  //     }
-  //   }
-
-  //   // Call the function to start the process
-  //   sendConcurrentRequests();
-  // }, []);
-
   useGSAP(
     () => {
-      if (congratsRef.current && finalPuzzleCompleted) {
-        let split = SplitText.create(congratsRef.current, {
-          type: "chars",
-        });
+      document.fonts.ready.then(() => {
+        if (
+          congratsIconRef.current &&
+          congratsRef.current &&
+          finalPuzzleCompleted
+        ) {
+          SplitText.create(congratsRef.current, {
+            type: "chars",
+            charsClass:
+              "congratsChar font-bold text-primary-600 aspect-square text-trim-start flex items-center",
+            onSplit: (self) => {
+              gsap.from(self.chars, {
+                yPercent: "random([-10,10])",
+                rotation: "random([-10, 10])",
+                autoAlpha: 0,
+                delay: 0.125,
+                stagger: {
+                  amount: 0.5,
+                  from: "random",
+                },
+              });
+            },
+          });
 
-        gsap.from(split.chars, {
-          yPercent: "random([-10,10])",
-          autoAlpha: 0,
-          stagger: {
-            each: 0.0375,
-          },
-        });
-      }
+          gsap.fromTo(
+            congratsIconRef.current,
+            {
+              rotate: 4,
+              opacity: 0,
+              y: -8,
+              duration: 0.25,
+              delay: 0.5,
+            },
+            {
+              opacity: 1,
+              y: 0,
+              rotate: -12,
+              duration: 0.25,
+              ease: "back.inOut",
+              delay: 0.5,
+            }
+          );
+        }
+      });
     },
-    { dependencies: [gameCompleted, finalPuzzleCompleted, congratsRef.current] }
+    {
+      dependencies: [
+        gameCompleted,
+        finalPuzzleCompleted,
+        congratsIconRef.current,
+        congratsRef.current,
+      ],
+    }
   );
 
   return (
     <div className="font-display w-screen h-screen bg-gray-100 py-8 px-4 overflow-y-auto">
-      <div className="mb-8 w-full">
+      <div className="mb-2 w-full">
         <img className="mx-auto mb-8" width="300" src={GlobeLogo} />
         <img className="mx-auto" width="75" src={AlignLogo} />
       </div>
@@ -377,8 +347,8 @@ function App() {
             </div>
           </div>
           <div>
-            <div className="flex gap-2 items-center h-[32px] justify-between">
-              <div className="flex h-full gap-2 mb-2">
+            <div className="flex gap-2 h-[32px] justify-between mb-2 items-end">
+              <div className="flex h-full gap-2">
                 <div className="h-full text-primary-600 rounded-md min-w-[72px] flex items-center gap-1">
                   <TimerIcon size={20} weight="regular" />
                   <span className="text-lg text-trim-start leading-none">
@@ -392,6 +362,13 @@ function App() {
                   </span>
                 </div>
               </div>
+              <button
+                onClick={() => setChangePuzzle(true)}
+                className="w-max flex gap-1 whitespace-nowrap text-primary-600 bg-primary-100 border-2 border-primary-600 rounded-full py-1 px-2"
+              >
+                <PuzzlePieceIcon size={24} />
+                <span>Change puzzle</span>
+              </button>
             </div>
             <Grid
               puzzleIndex={puzzleData.index}
@@ -486,109 +463,150 @@ function App() {
           </form>
         </div>
       )}
-      <Modal isOpen={gameCompleted} finalPuzzleCompleted>
-        {finalPuzzleCompleted ? (
-          <div>
-            <h2
-              ref={congratsRef}
-              className="text-center text-2xl font-bold mb-1"
-            >
-              Congratulations!
+      {changePuzzle && (
+        <Modal hasClose onClose={() => setChangePuzzle(false)}>
+          <div className="text-center">
+            <h2 className="text-2xl text-trim-startfont-bold mb-1">
+              Change Puzzle
             </h2>
-            <p className="mb-4 text-center">
-              You've now finished all of our puzzles! This marks the end of our
-              event at Lollapuzzoola 18. We hope you had a good time playing!
-            </p>
-            <div className="p-4 flex bg-primary-100 gap-4 rounded-md">
-              <img width="75" src={AlignLogo} />
-              <p>
-                If you're interested in playing more Align puzzles, you can
-                access the game and its archive{" "}
-                <a
-                  className="text-primary-600 shadow-[0_1px_0_var(--orange)]"
-                  href="https://www.bostonglobe.com/games/align/"
-                  target="_blank"
-                  rel="noopener noreferrer"
+            <p className="mb-4">Enter the password of the puzzle below.</p>
+            <form onSubmit={handleSubmitPassword}>
+              <fieldset className="flex gap-1">
+                <input
+                  type="text"
+                  id="password-input"
+                  autoComplete="off"
+                  onChange={resetFormMsg}
+                  ref={passwordRef}
+                  className={clsx(
+                    formMsg.type === "password" && `border-red-600`,
+                    "w-full p-2 border border-gray-300 rounded grow"
+                  )}
+                />
+                <button
+                  className="cursor-pointer bg-primary-600 text-white px-4 rounded
+                hover:bg-primary-600/90 transition-colors"
                 >
-                  on our website
-                </a>{" "}
-                or in the Globe mobile app.
-              </p>
-            </div>
+                  {submitting.text}
+                </button>
+              </fieldset>
+              {formMsg.type === "password" && formMsg.text && (
+                <p className="text-red-600 mt-1">{formMsg.text}</p>
+              )}
+            </form>
           </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-2 mb-8">
-              <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
-                <h3 className="text-lg mb-1">Time</h3>
-                <p className="text-4xl text-primary-600 font-bold">
-                  {formatTime({ ms: timer, legible: true })}
-                </p>
+        </Modal>
+      )}
+      {gameCompleted && (
+        <Modal>
+          {finalPuzzleCompleted ? (
+            <div>
+              <div className="grid place-items-center">
+                <h2 className="inline-block relative text-center text-2xl text-trim-startfont-bold mb-1">
+                  <span ref={congratsRef}>Congratulations!</span>
+                  <CrownSimpleIcon
+                    ref={congratsIconRef}
+                    size={24}
+                    color="var(--orange)"
+                    weight="fill"
+                    className="absolute -top-4 -left-2 z-2"
+                  />
+                </h2>
               </div>
-              <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
-                <h3 className="text-lg mb-1">Moves</h3>
-                <p className="text-4xl text-primary-600 font-bold">
-                  {puzzleData.moves}
+              <p className="mb-4">
+                You've now finished all of our puzzles! This marks the end of
+                our event at Lollapuzzoola 18. We hope you had a good time
+                playing!
+              </p>
+              <a
+                href="https://www.bostonglobe.com/games/align/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block cursor-pointer p-4 flex bg-primary-100 gap-4 rounded-md"
+              >
+                <div className="aspect-square h-min">
+                  <img src={AlignLogo} width="75" />
+                </div>
+                <p className="text-primary-600">
+                  Interested in playing more Align? Click here to play today's
+                  daily puzzle on our website!
                 </p>
-              </div>
+              </a>
             </div>
-            <div className="text-center">
-              {submitting.type === "score" && (
-                <>
-                  <h2 className="text-2xl font-bold mb-1">Nice work!</h2>
-                  <p>Submit your score by pressing the button below.</p>
-                  <button
-                    disabled={submitting.loading}
-                    onClick={handleSubmitScore}
-                    className={clsx(
-                      `mt-4 cursor-pointer w-full p-4 rounded hover:bg-primary-600/90 transition-colors`,
-                      submitting.text === "Success!"
-                        ? "bg-green-600 text-green-100 pointer-events-none"
-                        : "bg-primary-600 text-primary-100"
-                    )}
-                  >
-                    {submitting.text}
-                  </button>
-                </>
-              )}
-              {submitting.type === "puzzle" && (
-                <>
-                  <h2 className="text-2xl font-bold mb-1">
-                    Ready for another?
-                  </h2>
-                  <p className="mb-1">
-                    Enter the password for the next puzzle below.
+          ) : (
+            <>
+              <div className="flex justify-center gap-2 mb-8">
+                <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
+                  <h3 className="text-lg mb-1">Time</h3>
+                  <p className="text-4xl text-primary-600 font-bold">
+                    {formatTime({ ms: timer, legible: true })}
                   </p>
-                  <form onSubmit={handleSubmitPassword}>
-                    <fieldset className="flex gap-1">
-                      <input
-                        type="text"
-                        id="password-input"
-                        autoComplete="off"
-                        onChange={resetFormMsg}
-                        ref={passwordRef}
-                        className={clsx(
-                          formMsg.type === "password" && `border-red-600`,
-                          "w-full p-2 border border-gray-300 rounded grow"
-                        )}
-                      />
-                      <button
-                        className="cursor-pointer bg-primary-600 text-white px-4 rounded
-              hover:bg-primary-600/90 transition-colors"
-                      >
-                        {submitting.text}
-                      </button>
-                    </fieldset>
-                    {formMsg.type === "password" && formMsg.text && (
-                      <p className="text-red-600 mt-1">{formMsg.text}</p>
-                    )}
-                  </form>
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </Modal>
+                </div>
+                <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
+                  <h3 className="text-lg mb-1">Moves</h3>
+                  <p className="text-4xl text-primary-600 font-bold">
+                    {puzzleData.moves}
+                  </p>
+                </div>
+              </div>
+              <div className="text-center">
+                {submitting.type === "score" && (
+                  <>
+                    <h2 className="text-2xl font-bold mb-1">Nice work!</h2>
+                    <p>Submit your score by pressing the button below.</p>
+                    <button
+                      disabled={submitting.loading}
+                      onClick={handleSubmitScore}
+                      className={clsx(
+                        `mt-4 cursor-pointer w-full p-4 rounded hover:bg-primary-600/90 transition-colors`,
+                        submitting.text === "Success!"
+                          ? "bg-green-600 text-green-100 pointer-events-none"
+                          : "bg-primary-600 text-primary-100"
+                      )}
+                    >
+                      {submitting.text}
+                    </button>
+                  </>
+                )}
+                {submitting.type === "puzzle" && (
+                  <>
+                    <h2 className="text-2xl font-bold mb-1">
+                      Ready for another?
+                    </h2>
+                    <p className="mb-1">
+                      Enter the password for the next puzzle below.
+                    </p>
+                    <form onSubmit={handleSubmitPassword}>
+                      <fieldset className="flex gap-1">
+                        <input
+                          type="text"
+                          id="password-input"
+                          autoComplete="off"
+                          onChange={resetFormMsg}
+                          ref={passwordRef}
+                          className={clsx(
+                            formMsg.type === "password" && `border-red-600`,
+                            "w-full p-2 border border-gray-300 rounded grow"
+                          )}
+                        />
+                        <button
+                          className="cursor-pointer bg-primary-600 text-white px-4 rounded
+                hover:bg-primary-600/90 transition-colors"
+                        >
+                          {submitting.text}
+                        </button>
+                      </fieldset>
+                      {formMsg.type === "password" && formMsg.text && (
+                        <p className="text-red-600 mt-1">{formMsg.text}</p>
+                      )}
+                    </form>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
     </div>
   );
 }

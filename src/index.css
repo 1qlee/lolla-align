@@ -28,16 +28,16 @@
 @theme {
   --font-display: "Benton Sans Cond";
 
-  --color-primary-600: rgb(185, 79, 9);
-  --color-primary-100: rgb(255, 243, 235);
+  --color-primary-600: #b94f09;
+  --color-primary-100: #fff3eb;
 }
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --blue-button: #005dc7;
-  --orange: rgb(185, 79, 9);
-  --orange-100: rgb(255, 243, 235);
+  --orange: hsl(24, 91%, 38%);
+  --orange-100: hsl(24, 100%, 96%);
 }
 
 button[disabled] {

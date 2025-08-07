@@ -1,21 +1,22 @@
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
 import gsap from "gsap";
+import { XIcon } from "@phosphor-icons/react";
 
 gsap.registerPlugin(useGSAP);
 
-export default function Modal({ isOpen, children }) {
+export default function Modal({ children, hasClose, onClose }) {
   const modalRef = useRef(null);
 
   useGSAP(() => {
-    gsap.from(modalRef, {
+    gsap.from(modalRef.current, {
       y: 100,
-      scale: 0.8,
-      duration: 0.5,
+      scale: 0.9,
+      duration: 0.25,
+      autoAlpha: 0,
+      ease: "power1.out",
     });
   });
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto bg-gray-900/20">
@@ -26,6 +27,15 @@ export default function Modal({ isOpen, children }) {
         aria-modal="true"
         aria-labelledby="modal-title"
       >
+        {hasClose && (
+          <button
+            onClick={onClose}
+            className="absolute right-2 top-2 text-primary-600 border-orange border-2 grid place-items-center bg-orangeWhite rounded-full hover:bg-white transition-200 transition-colors z-10 h-[32px] w-[32px]"
+            aria-label="Close dialog box"
+          >
+            <XIcon size={16} weight="bold" />
+          </button>
+        )}
         {children}
       </div>
     </div>
