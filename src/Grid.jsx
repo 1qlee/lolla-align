@@ -151,6 +151,11 @@ export default function Grid({
           draggedTile.current = this.target;
           zIndexRef.current = draggedTile.current?.style.zIndex;
 
+          // reset pointerEvents on all draggable tiles
+          gsap.set(draggableRefs, {
+            pointerEvents: "auto",
+          });
+
           gsap.fromTo(
             this.target,
             {
