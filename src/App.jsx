@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, Fragment } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Draggable } from "gsap/Draggable";
@@ -15,6 +15,7 @@ import {
   ArrowsClockwiseIcon,
   CrownSimpleIcon,
   PuzzlePieceIcon,
+  StarIcon,
 } from "@phosphor-icons/react";
 import clsx from "clsx";
 
@@ -56,14 +57,33 @@ const formatTime = (options) => {
 };
 
 const FINAL_PUZZLE_INDEX = puzzles.length - 1;
+const FLAVOR_TEXTS = [
+  "Off to a great start!",
+  "You've got the hang of it!",
+  "Momentum is building!",
+  "You're on a roll now!",
+  "The puzzle bows before you!",
+  "Aligned with success!",
+];
 
 function App() {
   const congratsRef = useRef(null);
   const congratsIconRef = useRef(null);
   const passwordRef = useRef("");
   const nameRef = useRef("");
+  const moveRefs = useRef([]);
   const intervalRef = useRef(null);
   const [timer, setTimer] = useState(0);
+  const [puzzleResults, setPuzzleResults] = useState([
+    {
+      moves: {
+        num: 14,
+        width: 80,
+      },
+      time: "1:22:53",
+      index: 1,
+    },
+  ]);
   const [formMsg, setFormMsg] = useState({
     text: "",
     type: "",
@@ -104,7 +124,7 @@ function App() {
   async function handleSubmitPassword(event, checkName) {
     event.preventDefault();
 
-    const inputPassword = passwordRef.current.value.trim();
+    const inputPassword = passwordRef.current.value.trim().toLowerCase();
 
     if (!inputPassword) {
       return;
@@ -330,6 +350,55 @@ function App() {
     }
   );
 
+  useEffect(() => {
+    if (gameCompleted) {
+      const updatedResults = [...puzzleResults];
+      updatedResults[puzzleData.index] = {
+        index: puzzleData.index,
+        moves: {
+          num: puzzleData.moves,
+          isLowest: false,
+        },
+        time: {
+          num: timer,
+          isLowest: false,
+        },
+      };
+
+      const filteredResults = updatedResults.filter((result) => result);
+
+      // Get all move counts and find the lowest
+      const allMoves = filteredResults.map((result) => result.moves.num);
+      const lowestMoves = Math.min(...allMoves) || 0;
+
+      // Get all time values and find the lowest
+      const allTimes = filteredResults.map((result) => result.time.num);
+      const lowestTime = Math.min(...allTimes) || 0;
+
+      const normalizedResults = updatedResults.map((result) => {
+        if (!result) {
+          return result;
+        }
+
+        return {
+          ...result,
+          moves: {
+            ...result.moves,
+            // Checks if the move number is the lowest
+            isLowest: result.moves.num === lowestMoves,
+          },
+          time: {
+            ...result.time,
+            // Checks if the time value is the lowest
+            isLowest: result.time.num === lowestTime,
+          },
+        };
+      });
+
+      setPuzzleResults(normalizedResults);
+    }
+  }, [gameCompleted]);
+
   return (
     <div className="font-display w-screen h-screen bg-gray-100 py-8 px-4 overflow-y-auto">
       <div className="mb-2 w-full">
@@ -469,7 +538,7 @@ function App() {
             <h2 className="text-2xl text-trim-startfont-bold mb-1">
               Change Puzzle
             </h2>
-            <p className="mb-4">Enter the password of the puzzle below.</p>
+            <p className="mb-4">Enter the password of the puzzle.</p>
             <form onSubmit={handleSubmitPassword}>
               <fieldset className="flex gap-1">
                 <input
@@ -501,7 +570,7 @@ function App() {
         <Modal>
           {finalPuzzleCompleted ? (
             <div>
-              <div className="grid place-items-center">
+              <div className="grid place-items-center relative">
                 <h2 className="inline-block relative text-center text-2xl text-trim-startfont-bold mb-1">
                   <span ref={congratsRef}>Congratulations!</span>
                   <CrownSimpleIcon
@@ -513,16 +582,48 @@ function App() {
                   />
                 </h2>
               </div>
-              <p className="mb-4">
+              <p className="modal-text mb-4">
                 You've now finished all of our puzzles! This marks the end of
                 our event at Lollapuzzoola 18. We hope you had a good time
                 playing!
               </p>
+              <div className="grid grid-cols-[minmax(80px,auto)_minmax(80px,auto)_1fr] mb-4 gap-1">
+                <div className="font-bold">Puzzle</div>
+                <div className="font-bold">Time</div>
+                <div className="font-bold">Moves</div>
+                {puzzleResults.map((puzzle, index) => (
+                  <Fragment key={puzzle.index}>
+                    <div>{+puzzle.index + 1}</div>
+                    <div className="flex items-center">
+                      <span>{formatTime({ ms: puzzle.time.num })}</span>
+                      {puzzle.time.isLowest && (
+                        <StarIcon
+                          className="pb-1"
+                          color="orange"
+                          weight="fill"
+                          size={20}
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center">
+                      <span>{puzzle.moves.num}</span>
+                      {puzzle.moves.isLowest && (
+                        <StarIcon
+                          className="pb-1"
+                          color="orange"
+                          weight="fill"
+                          size={20}
+                        />
+                      )}
+                    </div>
+                  </Fragment>
+                ))}
+              </div>
               <a
                 href="https://www.bostonglobe.com/games/align/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block cursor-pointer p-4 flex bg-primary-100 gap-4 rounded-md"
+                className="modal-cta block cursor-pointer p-4 flex bg-primary-100 gap-4 rounded-md"
               >
                 <div className="aspect-square h-min">
                   <img src={AlignLogo} width="75" />
@@ -536,13 +637,13 @@ function App() {
           ) : (
             <>
               <div className="flex justify-center gap-2 mb-8">
-                <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
+                <div className="stat text-center bg-primary-100 py-2 px-4 rounded-md">
                   <h3 className="text-lg mb-1">Time</h3>
                   <p className="text-4xl text-primary-600 font-bold">
                     {formatTime({ ms: timer, legible: true })}
                   </p>
                 </div>
-                <div className="text-center bg-primary-100 py-2 px-4 rounded-md">
+                <div className="stat text-center bg-primary-100 py-2 px-4 rounded-md">
                   <h3 className="text-lg mb-1">Moves</h3>
                   <p className="text-4xl text-primary-600 font-bold">
                     {puzzleData.moves}
@@ -552,13 +653,17 @@ function App() {
               <div className="text-center">
                 {submitting.type === "score" && (
                   <>
-                    <h2 className="text-2xl font-bold mb-1">Nice work!</h2>
-                    <p>Submit your score by pressing the button below.</p>
+                    <h2 className="modal-text text-2xl font-bold mb-1">
+                      {FLAVOR_TEXTS[puzzleData.index]}
+                    </h2>
+                    <p className="modal-text">
+                      Submit your score by pressing the button.
+                    </p>
                     <button
                       disabled={submitting.loading}
                       onClick={handleSubmitScore}
                       className={clsx(
-                        `mt-4 cursor-pointer w-full p-4 rounded hover:bg-primary-600/90 transition-colors`,
+                        `modal-cta mt-4 cursor-pointer w-full p-4 rounded hover:bg-primary-600/90 transition-colors`,
                         submitting.text === "Success!"
                           ? "bg-green-600 text-green-100 pointer-events-none"
                           : "bg-primary-600 text-primary-100"
@@ -574,7 +679,7 @@ function App() {
                       Ready for another?
                     </h2>
                     <p className="mb-1">
-                      Enter the password for the next puzzle below.
+                      Enter the password for the next puzzle.
                     </p>
                     <form onSubmit={handleSubmitPassword}>
                       <fieldset className="flex gap-1">

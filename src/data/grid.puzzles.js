@@ -734,9 +734,13 @@ export const puzzles = [
   },
   {
     password: "rainy",
+    size: {
+      width: 5,
+      height: 5,
+    },
     alphaGroups: [
       "S",
-      "P",
+      "A",
       "R",
       "E",
       "E",
@@ -746,8 +750,8 @@ export const puzzles = [
       "M",
       "S",
       "L",
-      "I",
-      "V",
+      "O",
+      "S",
       "ER",
       "S",
       "O",
@@ -763,217 +767,213 @@ export const puzzles = [
     ],
     cells: [
       {
-        kind: 1,
         point: {
-          y: 0,
           x: 0,
+          y: 0,
         },
         string: "E",
-      },
-      {
         kind: 1,
-        point: {
-          y: 0,
-          x: 1,
-        },
-        string: "I",
       },
       {
-        kind: 1,
-        point: {
-          x: 2,
-          y: 0,
-        },
-        string: "A",
-      },
-      {
-        kind: 1,
-        point: {
-          y: 0,
-          x: 3,
-        },
-        string: "R",
-      },
-      {
-        givenIndex: 0,
-        kind: 0,
-        point: {
-          y: 0,
-          x: 4,
-        },
-        string: "E",
-      },
-      {
-        kind: 1,
-        point: {
-          y: 1,
-          x: 0,
-        },
-        string: "A",
-      },
-      {
-        givenIndex: 4,
-        kind: 0,
         point: {
           x: 1,
-          y: 1,
-        },
-        string: "R",
-      },
-      {
-        kind: 1,
-        point: {
-          x: 2,
-          y: 1,
-        },
-        string: "P",
-      },
-      {
-        kind: 1,
-        point: {
-          x: 3,
-          y: 1,
-        },
-        string: "HA",
-      },
-      {
-        givenIndex: 1,
-        kind: 0,
-        point: {
-          x: 4,
-          y: 1,
-        },
-        string: "S",
-      },
-      {
-        kind: 1,
-        point: {
-          y: 2,
-          x: 0,
-        },
-        string: "S",
-      },
-      {
-        kind: 1,
-        point: {
-          x: 1,
-          y: 2,
+          y: 0,
         },
         string: "Y",
+        kind: 1,
+      },
+      {
+        point: {
+          x: 2,
+          y: 0,
+        },
+        string: "M",
+        kind: 1,
+      },
+      {
+        point: {
+          y: 0,
+          x: 3,
+        },
+        string: "L",
+        kind: 1,
+      },
+      {
+        point: {
+          y: 0,
+          x: 4,
+        },
+        givenIndex: 2,
+        string: "E",
+        kind: 0,
+      },
+      {
+        point: {
+          x: 0,
+          y: 1,
+        },
+        string: "S",
+        kind: 1,
+      },
+      {
+        point: {
+          x: 1,
+          y: 1,
+        },
+        givenIndex: 4,
+        string: "R",
+        kind: 0,
+      },
+      {
+        point: {
+          x: 2,
+          y: 1,
+        },
+        string: "A",
+        kind: 1,
+      },
+      {
+        string: "A",
+        kind: 1,
+        point: {
+          y: 1,
+          x: 3,
+        },
+      },
+      {
+        string: "S",
+        kind: 0,
+        point: {
+          x: 4,
+          y: 1,
+        },
+        givenIndex: 3,
+      },
+      {
+        string: "T",
+        kind: 1,
+        point: {
+          x: 0,
+          y: 2,
+        },
+      },
+      {
+        string: "ER",
+        kind: 1,
+        point: {
+          x: 1,
+          y: 2,
+        },
       },
       {
         kind: 0,
         givenIndex: 5,
+        string: "S",
         point: {
           y: 2,
           x: 2,
         },
-        string: "V",
       },
       {
         kind: 1,
+        string: "HA",
         point: {
+          y: 2,
           x: 3,
-          y: 2,
         },
-        string: "E",
       },
       {
         kind: 1,
+        string: "E",
         point: {
-          y: 2,
           x: 4,
+          y: 2,
         },
-        string: "M",
       },
       {
+        kind: 0,
+        givenIndex: 0,
+        string: "O",
         point: {
           x: 0,
           y: 3,
         },
-        string: "O",
-        kind: 0,
-        givenIndex: 2,
       },
       {
-        point: {
-          x: 1,
-          y: 3,
-        },
-        string: "ER",
-        kind: 1,
-      },
-      {
-        point: {
-          x: 2,
-          y: 3,
-        },
         string: "S",
         kind: 1,
+        point: {
+          y: 3,
+          x: 1,
+        },
       },
       {
+        string: "O",
+        kind: 1,
         point: {
-          x: 3,
           y: 3,
+          x: 2,
         },
+      },
+      {
         string: "G",
         kind: 0,
         givenIndex: 6,
-      },
-      {
         point: {
-          x: 4,
+          x: 3,
           y: 3,
         },
-        string: "T",
-        kind: 1,
       },
       {
+        string: "E",
+        kind: 1,
+        point: {
+          y: 3,
+          x: 4,
+        },
+      },
+      {
+        string: "M",
         point: {
           x: 0,
           y: 4,
         },
-        string: "M",
+        givenIndex: 1,
         kind: 0,
-        givenIndex: 3,
       },
       {
-        point: {
-          y: 4,
-          x: 1,
-        },
         string: "M",
+        point: {
+          x: 1,
+          y: 4,
+        },
         kind: 1,
       },
       {
+        string: "A",
         point: {
           y: 4,
           x: 2,
         },
-        string: "E",
         kind: 1,
       },
       {
-        kind: 1,
-        string: "L",
+        string: "R",
         point: {
           y: 4,
           x: 3,
         },
+        kind: 1,
       },
       {
-        kind: 1,
         string: "E",
         point: {
           x: 4,
           y: 4,
         },
+        kind: 1,
       },
     ],
-    size: {
-      height: 5,
-      width: 5,
-    },
   },
   {
     password: "crest",
