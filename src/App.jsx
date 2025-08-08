@@ -71,19 +71,9 @@ function App() {
   const congratsIconRef = useRef(null);
   const passwordRef = useRef("");
   const nameRef = useRef("");
-  const moveRefs = useRef([]);
   const intervalRef = useRef(null);
   const [timer, setTimer] = useState(0);
-  const [puzzleResults, setPuzzleResults] = useState([
-    {
-      moves: {
-        num: 14,
-        width: 80,
-      },
-      time: "1:22:53",
-      index: 1,
-    },
-  ]);
+  const [puzzleResults, setPuzzleResults] = useState([]);
   const [formMsg, setFormMsg] = useState({
     text: "",
     type: "",
